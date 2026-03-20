@@ -13,18 +13,7 @@ add_compile_options(-std=c++14 -Wall -DNDEBUG -Wl,--no-undefined)
 option (BUILD_PYTHON "Build the python bindings" YES)
 
 string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,--no-undefined")
-# When the software is built with, e.g., `pip` or `build`, `scikit-build-core`
-# controls the build, and software will be installed in `site-packages`. In
-# this case we do not want to install libraries in `lib`, but instead follow
-# the convention of installing libraries in a directory `<package>.libs`.
-if(SKBUILD)
-  set(INSTALL_LIBDIR lofarbeam.libs)
-  set(INSTALL_INCDIR lofarbeam.includes)
-else()
-  set(INSTALL_LIBDIR lib)
-  set(INSTALL_INCDIR include)
-endif()
-
+include(GNUInstallDirs)
 # The following stuff will set the "rpath" correctly, so that
 # LD_LIBRARY_PATH doesn't have to be set.
 
@@ -58,12 +47,35 @@ add_library(stationresponse SHARED
 add_library(elementresponse SHARED
   ElementResponse.cc)
 
-set_target_properties(stationresponse PROPERTIES VERSION 3)
-set_target_properties(elementresponse PROPERTIES VERSION 3)
+set_target_properties(stationresponse PROPERTIES VERSION 3
+  INSTALL_RPATH "$ORIGIN")
+set_target_properties(elementresponse PROPERTIES VERSION 3
+  INSTALL_RPATH "$ORIGIN")
 
 # The elementresponse lib does not require casacore, so
 # linking casacore only to stationresponse is enough.
 target_link_libraries(stationresponse PUBLIC ${CASACORE_LIBRARIES})
+
+install (TARGETS stationresponse elementresponse
+	COMPONENT libraries
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# FIXME add COMPONENT for headers
+install (FILES
+  AntennaField.h
+  Constants.h
+  LofarMetaDataUtil.h
+  Station.h
+  Types.h
+  ITRFConverter.h
+  ITRFDirection.h
+  COMPONENT headers
+DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/StationResponse)
+
+install (FILES
+  ElementResponse.h
+  COMPONENT headers
+DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ElementResponse)
 
 find_package(Doxygen)
 
@@ -102,23 +114,8 @@ if (BUILD_PYTHON)
   message("Compiling Python ${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR} support. If this is not the intended target use 'DPYTHON_EXECUTABLE' to control.")
   # bind against boost-python for compilation of the python API
   # depending on major release version of the python libraries
-  if(${Python3_VERSION_MAJOR} VERSION_LESS "3")
-    set(casapy "")
-    set(oldboostpy "")
-  else()
-    set(casapy "3")
-    set(oldboostpy "3")
-  endif()
-  set(boostpy ${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
-  message(STATUS "Trying to find boost-python libraries with version suffix ${boostpy}")
-  # find_package(Boost 1.67.0 COMPONENTS python${boostpy} numpy${boostpy})
-  # if(NOT Boost_FOUND)
-  #   message(STATUS "Falling back to old Boost search.")
-  #   set(boostpy ${oldboostpy})
-  #   find_package(Boost REQUIRED COMPONENTS python${boostpy})
-  # endif()
-  find_package (Casacore REQUIRED COMPONENTS python${casapy})
-  set(casapylib ${CASA_PYTHON${casapy}_LIBRARY})
+  find_package (Casacore REQUIRED COMPONENTS python3)
+  set(casapylib ${CASA_PYTHON3_LIBRARY})
 
   set(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
   set(BOOST_PYTHON_LIBRARY "Boost::${BOOST_PYTHON_COMPONENT}")
@@ -128,6 +125,8 @@ if (BUILD_PYTHON)
   set_target_properties(_stationresponse PROPERTIES PREFIX "")
 
   target_link_libraries(_stationresponse PRIVATE stationresponse ${casapylib} Python3::Module ${BOOST_PYTHON_LIBRARY})
+  set_target_properties(_stationresponse PROPERTIES INSTALL_RPATH
+                                            "$ORIGIN/../../${CMAKE_INSTALL_LIBDIR}")
   if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_options(_stationresponse PRIVATE "LINKER:--as-needed")
   endif()
@@ -135,34 +134,10 @@ if (BUILD_PYTHON)
   # Install pyeverybeam in site-packages directory
   install(
     TARGETS _stationresponse
-    COMPONENT libraries
-    LIBRARY DESTINATION ${INSTALL_LIBDIR})
+    LIBRARY DESTINATION lofar/stationresponse)
   install(
     FILES __init__.py
-    COMPONENT libraries
-    DESTINATION ${INSTALL_LIBDIR})
-
+    DESTINATION lofar/stationresponse)
 
 endif(BUILD_PYTHON)
-
-install (TARGETS stationresponse elementresponse
-	COMPONENT libraries
-	LIBRARY DESTINATION ${INSTALL_LIBDIR})
-
-# FIXME add COMPONENT for headers
-install (FILES
-  AntennaField.h
-  Constants.h
-  LofarMetaDataUtil.h
-  Station.h
-  Types.h
-  ITRFConverter.h
-  ITRFDirection.h
-  COMPONENT headers
-DESTINATION ${INSTALL_INCDIR}/StationResponse)
-
-install (FILES
-  ElementResponse.h
-  COMPONENT headers
-DESTINATION ${INSTALL_INCDIR}/ElementResponse)
 
