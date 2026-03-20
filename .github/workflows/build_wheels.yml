@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         buildplat:
-        - { runs_on: ubuntu-20.04, sys: manylinux, arch: x86_64 }
+        - { runs_on: ubuntu-latest, sys: manylinux, arch: x86_64 }
         python:
         - { cp: "cp39",   rel: "3.9" }
         - { cp: "cp310",  rel: "3.10" }
