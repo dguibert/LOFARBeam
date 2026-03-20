@@ -1,0 +1,52 @@
+name: Release Binaries
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Make release
+    depends: build_wheels
+    runs-on: ${{ matrix.buildplat.runs_on }}
+    strategy:
+      matrix:
+        buildplat:
+        - { runs_on: ubuntu-latest, sys: manylinux, arch: x86_64 }
+        python:
+        - { cp: "cp39",   rel: "3.9" }
+        - { cp: "cp310",  rel: "3.10" }
+        - { cp: "cp311",  rel: "3.11" }
+        - { cp: "cp312",  rel: "3.12" }
+    # https://trstringer.com/github-actions-create-release-upload-artifacts/
+    steps:
+    - name: version
+        run: echo "::set-output name=version::$(echo v0.1)"
+        id: version
+    - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+        draft: false
+        prerelease: false
+        release_name: ${{ steps.version.outputs.version }}
+        tag_name: ${{ github.ref }}
+        #body_path: CHANGELOG.md
+        env:
+        GITHUB_TOKEN: ${{ github.token }}
+        - uses: actions/download-artifact@v8
+          with:
+            #path: 
+            merge-multiple: true
+        - name: Display structure of downloaded files
+          run: ls -R
+
+        - name: Upload assets
+            uses: actions/upload-release-asset@v1
+            env:
+                GITHUB_TOKEN: ${{ github.token }}
+            with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ${{matrix.python.cp}}-${{matrix.buildplat.sys}}-${{matrix.buildplat.arch}}
+                #asset_name: 
+                #asset_content_type: application/gzip
