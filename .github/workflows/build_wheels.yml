@@ -4,13 +4,18 @@ on: [push, pull_request]
 
 jobs:
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Build wheel for ${{matrix.python.cp}}-${{matrix.buildplat.sys}}
+          ${{matrix.buildplat.arch}}
+    runs-on: ${{ matrix.buildplat.runs_on }}
     strategy:
       matrix:
-        # macos-15-intel is an Intel runner, macos-14 is Apple silicon
-        os: [ubuntu-latest] #, ubuntu-24.04-arm, windows-latest, windows-11-arm, macos-15-intel, macos-14]
-
+        buildplat:
+        - { runs_on: ubuntu-20.04, sys: manylinux, arch: x86_64 }
+        python:
+        - { cp: "cp39",   rel: "3.9" }
+        - { cp: "cp310",  rel: "3.10" }
+        - { cp: "cp311",  rel: "3.11" }
+        - { cp: "cp312",  rel: "3.12" }
     steps:
       - uses: actions/checkout@v6
         with:
@@ -18,7 +23,9 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4.0
-        # env:
+        env:
+          CIBW_BUILD: ${{ matrix.python.cp }}-${{ matrix.buildplat.sys }}*
+          CIBW_ARCHS: ${{ matrix.buildplat.arch }}
         #   CIBW_SOME_OPTION: value
         #   ...
         # with:
@@ -26,7 +33,8 @@ jobs:
         #   output-dir: wheelhouse
         #   config-file: "{package}/pyproject.toml"
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
+            name: ${{matrix.python.cp}}-${{matrix.buildplat.sys}}-${{matrix.buildplat.arch}}
+            path: wheelhouse/*
