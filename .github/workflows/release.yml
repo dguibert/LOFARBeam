@@ -4,13 +4,14 @@ on:
     tags:
       - '*'
 
+permissions:
+    contents: write
+    packages: write
+    id-token: write
+    attestations: write
+
 jobs:
   release:
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-      attestations: write
     name: Make release
     runs-on: ${{ matrix.buildplat.runs_on }}
     strategy:
@@ -24,23 +25,20 @@ jobs:
         #- { cp: "cp312",  rel: "3.12" }
     # https://trstringer.com/github-actions-create-release-upload-artifacts/
     steps:
-      - name: version
-        run: echo "version=v0.1" >> $GITHUB_OUTPUT
-        id: version
-      - name: release
-        uses: actions/create-release@v1
-        id: create_release
-        with:
-          draft: false
-          prerelease: false
-          release_name: ${{ steps.version.outputs.version }}
-          tag_name: ${{ github.ref }}
-          #body_path: CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" \
+              --draft \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+              --generate-notes
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4.0
         env:
