@@ -6,6 +6,11 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
     name: Make release
     runs-on: ${{ matrix.buildplat.runs_on }}
     strategy:
