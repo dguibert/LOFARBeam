@@ -20,7 +20,7 @@ jobs:
     # https://trstringer.com/github-actions-create-release-upload-artifacts/
     steps:
       - name: version
-        run: echo "::set-output name=version::v0.1"
+        run: echo "version=v0.1" >> $GITHUB_OUTPUT
         id: version
       - name: release
         uses: actions/create-release@v1
