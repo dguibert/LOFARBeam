@@ -63,9 +63,11 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
 
-      - name: Upload assets
-        uses: alexellis/upload-assets@0.4.1
+      - name: Upload wheels
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["./wheelhouse/*.whl"]'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release upload "$tag" \
+              --clobber \
+              --wheelhouse/*.whl
