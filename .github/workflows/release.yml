@@ -7,7 +7,7 @@ on:
 jobs:
   release:
     name: Make release
-    depends: build_wheels
+    needs: build_wheels
     runs-on: ${{ matrix.buildplat.runs_on }}
     strategy:
       matrix:
