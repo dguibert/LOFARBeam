@@ -7,46 +7,66 @@ on:
 jobs:
   release:
     name: Make release
-    needs: build_wheels
     runs-on: ${{ matrix.buildplat.runs_on }}
     strategy:
       matrix:
         buildplat:
         - { runs_on: ubuntu-latest, sys: manylinux, arch: x86_64 }
         python:
-        - { cp: "cp39",   rel: "3.9" }
+        #- { cp: "cp39",   rel: "3.9" }
         - { cp: "cp310",  rel: "3.10" }
-        - { cp: "cp311",  rel: "3.11" }
-        - { cp: "cp312",  rel: "3.12" }
+        #- { cp: "cp311",  rel: "3.11" }
+        #- { cp: "cp312",  rel: "3.12" }
     # https://trstringer.com/github-actions-create-release-upload-artifacts/
     steps:
-    - name: version
-      run: echo "::set-output name=version::v0.1"
-      id: version
-    - name: release
-      uses: actions/create-release@v1
-      id: create_release
-      with:
-        draft: false
-        prerelease: false
-        release_name: ${{ steps.version.outputs.version }}
-        tag_name: ${{ github.ref }}
-        #body_path: CHANGELOG.md
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-    - uses: actions/download-artifact@v8
-      with:
-        #path: 
-        merge-multiple: true
-    - name: Display structure of downloaded files
-      run: ls -R
+      - name: version
+        run: echo "::set-output name=version::v0.1"
+        id: version
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref }}
+          #body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
-    - name: Upload assets
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{matrix.python.cp}}-${{matrix.buildplat.sys}}-${{matrix.buildplat.arch}}
-        #asset_name: 
-          #asset_content_type: application/gzip
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.4.0
+        env:
+          CIBW_BUILD: ${{ matrix.python.cp }}-${{ matrix.buildplat.sys }}*
+          CIBW_ARCHS: ${{ matrix.buildplat.arch }}
+        #   CIBW_SOME_OPTION: value
+        #   ...
+        # with:
+        #   package-dir: .
+        #   output-dir: wheelhouse
+        #   config-file: "{package}/pyproject.toml"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+            name: ${{matrix.python.cp}}-${{matrix.buildplat.sys}}-${{matrix.buildplat.arch}}
+            path: wheelhouse/*
+      - uses: actions/download-artifact@v8
+        with:
+          #path: 
+          merge-multiple: true
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - name: Upload assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{matrix.python.cp}}-${{matrix.buildplat.sys}}-${{matrix.buildplat.arch}}
+          #asset_name: 
+            #asset_content_type: application/gzip
