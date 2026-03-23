@@ -51,15 +51,6 @@ jobs:
         #   output-dir: wheelhouse
         #   config-file: "{package}/pyproject.toml"
 
-      #- name: Upload Artifacts
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #      name: ${{matrix.python.cp}}-${{matrix.buildplat.sys}}-${{matrix.buildplat.arch}}
-      #      path: wheelhouse/*
-      #- uses: actions/download-artifact@v8
-      #  with:
-      #    #path: 
-      #    merge-multiple: true
       - name: Display structure of downloaded files
         run: ls -R
 

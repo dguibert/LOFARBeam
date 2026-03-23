@@ -52,6 +52,7 @@ before-all = "yum install -y boost-devel"
 before-build = "pip install --upgrade pip; pip install oldest-supported-numpy"
 build = "cp3{9,10,11,12,13}-*_x86_64"
 #build = "cp310-*_x86_64"
+test-command = "python -c \"import lofar.stationresponse as lsr\""
 
 [tool.cibuildwheel.linux]
 skip = ["*-musllinux_*"]
