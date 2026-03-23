@@ -18,11 +18,11 @@ jobs:
       matrix:
         buildplat:
         - { runs_on: ubuntu-latest, sys: manylinux, arch: x86_64 }
-        python:
-        #- { cp: "cp39",   rel: "3.9" }
-        - { cp: "cp310",  rel: "3.10" }
-        #- { cp: "cp311",  rel: "3.11" }
-        #- { cp: "cp312",  rel: "3.12" }
+        #python:
+        ##- { cp: "cp39",   rel: "3.9" }
+        #- { cp: "cp310",  rel: "3.10" }
+        ##- { cp: "cp311",  rel: "3.11" }
+        ##- { cp: "cp312",  rel: "3.12" }
     # https://trstringer.com/github-actions-create-release-upload-artifacts/
     steps:
       - uses: actions/checkout@v6
@@ -41,9 +41,9 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4.0
-        env:
-          CIBW_BUILD: ${{ matrix.python.cp }}-${{ matrix.buildplat.sys }}*
-          CIBW_ARCHS: ${{ matrix.buildplat.arch }}
+        #env:
+        #  CIBW_BUILD: ${{ matrix.python.cp }}-${{ matrix.buildplat.sys }}*
+        #  CIBW_ARCHS: ${{ matrix.buildplat.arch }}
         #   CIBW_SOME_OPTION: value
         #   ...
         # with:
