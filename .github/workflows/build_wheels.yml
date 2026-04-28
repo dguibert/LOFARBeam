@@ -11,7 +11,7 @@ jobs:
       matrix:
         buildplat:
         - { runs_on: ubuntu-latest, sys: manylinux, arch: x86_64 }
-        - { runs_on: ubuntu-latest, sys: manylinux, arch: aarch64 }
+        - { runs_on: ubuntu-24.04-arm, sys: manylinux, arch: aarch64 }
         python:
         - { cp: "cp39",   rel: "3.9" }
         - { cp: "cp310",  rel: "3.10" }
