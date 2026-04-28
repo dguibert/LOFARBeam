@@ -59,26 +59,32 @@ skip = ["*-musllinux_*"]
 [[tool.cibuildwheel.overrides]]
 select="cp38-*"
 manylinux-x86_64-image = "quay.io/casacore/casacore:py38_v3.7.1"
+manylinux-aarch64-image = "quay.io/casacore/casacore:py38_v3.7.1"
 
 [[tool.cibuildwheel.overrides]]
 select="cp39-*"
 manylinux-x86_64-image = "quay.io/casacore/casacore:py39_v3.7.1"
+manylinux-aarch64-image = "quay.io/casacore/casacore:py39_v3.7.1"
 
 [[tool.cibuildwheel.overrides]]
 select="cp310-*"
 manylinux-x86_64-image = "quay.io/casacore/casacore:py310_v3.7.1"
+manylinux-aarch64-image = "quay.io/casacore/casacore:py310_v3.7.1"
 
 [[tool.cibuildwheel.overrides]]
 select="cp311-*"
 manylinux-x86_64-image = "quay.io/casacore/casacore:py311_v3.7.1"
+manylinux-aarch64-image = "quay.io/casacore/casacore:py311_v3.7.1"
 
 [[tool.cibuildwheel.overrides]]
 select="cp312-*"
 manylinux-x86_64-image = "quay.io/casacore/casacore:py312_v3.7.1"
+manylinux-aarch64-image = "quay.io/casacore/casacore:py312_v3.7.1"
 
 [[tool.cibuildwheel.overrides]]
 select="cp313-*"
 manylinux-x86_64-image = "quay.io/casacore/casacore:py313_v3.7.1"
+manylinux-aarch64-image = "quay.io/casacore/casacore:py313_v3.7.1"
 
 #########################
 # scikit-build settings #
